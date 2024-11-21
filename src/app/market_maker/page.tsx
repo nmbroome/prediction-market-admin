@@ -12,6 +12,12 @@ interface SwapRequest {
   amount_in: number;
 }
 
+interface SwapResponse {
+  amount_out: number;
+  new_reserve_a: number;
+  new_reserve_b: number;
+}
+
 const MarketMakerPage: NextPage = () => {
   const [tokenA, setTokenA] = useState('TokenA');
   const [tokenB, setTokenB] = useState('TokenB');
@@ -19,7 +25,7 @@ const MarketMakerPage: NextPage = () => {
   const [reserveB, setReserveB] = useState<number>(1000);
   const [inputToken, setInputToken] = useState('TokenA');
   const [amountIn, setAmountIn] = useState<number>(0);
-  const [result, setResult] = useState<{ [key: string]: unknown } | null>(null);
+  const [result, setResult] = useState<SwapResponse | null>(null);
 
   const handleSwap = async () => {
     const swapData: SwapRequest = {
@@ -44,11 +50,17 @@ const MarketMakerPage: NextPage = () => {
         throw new Error('Failed to fetch data from API');
       }
 
-      const data = await response.json();
+      const data: SwapResponse = await response.json();
       setResult(data);
+      setReserveA(data.new_reserve_a);
+      setReserveB(data.new_reserve_b);
     } catch (error) {
       console.error('Error swapping tokens:', error);
-      setResult({ error: 'An error occurred while swapping tokens.' });
+      setResult({
+        amount_out: 0,
+        new_reserve_a: reserveA,
+        new_reserve_b: reserveB,
+      });
     }
   };
 
@@ -124,7 +136,9 @@ const MarketMakerPage: NextPage = () => {
       {result && (
         <div className="mt-4 p-4 bg-white shadow-md rounded-md">
           <h3 className="text-lg font-semibold">Swap Result:</h3>
-          <pre>{JSON.stringify(result, null, 2)}</pre>
+          <p>Amount Out: {result.amount_out}</p>
+          <p>New Reserve A: {result.new_reserve_a}</p>
+          <p>New Reserve B: {result.new_reserve_b}</p>
         </div>
       )}
     </div>
