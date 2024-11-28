@@ -18,7 +18,7 @@ interface SwapResponse {
   new_reserve_b: number;
 }
 
-const MarketMakerPage: NextPage = () => {
+const MarketMakerTestPage: NextPage = () => {
   const [tokenA, setTokenA] = useState('TokenA');
   const [tokenB, setTokenB] = useState('TokenB');
   const [reserveA, setReserveA] = useState<number>(1000);
@@ -56,18 +56,14 @@ const MarketMakerPage: NextPage = () => {
       setReserveB(data.new_reserve_b);
     } catch (error) {
       console.error('Error swapping tokens:', error);
-      setResult({
-        amount_out: 0,
-        new_reserve_a: reserveA,
-        new_reserve_b: reserveB,
-      });
+      setResult(null);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-black">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-black text-black">
       <div className="flex flex-col items-center bg-gray-100 p-4 rounded-md shadow-md w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4">Constant Product Market Maker</h2>
+        <h2 className="text-xl font-semibold mb-4">Constant Product Market Maker Test</h2>
         <div className="flex flex-col gap-4 w-full">
           <div>
             <label className="block font-medium">Token A:</label>
@@ -145,4 +141,4 @@ const MarketMakerPage: NextPage = () => {
   );
 };
 
-export default MarketMakerPage;
+export default MarketMakerTestPage;

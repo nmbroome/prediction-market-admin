@@ -76,8 +76,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
 }
 
 fn constant_product_swap(reserve_in: f64, reserve_out: f64, amount_in: f64) -> f64 {
-    let amount_in_with_fee = amount_in * 0.997; // 0.3% fee
-    let new_reserve_in = reserve_in + amount_in_with_fee;
+    let new_reserve_in = reserve_in + amount_in;
     let amount_out = reserve_out - (reserve_in * reserve_out) / new_reserve_in;
     amount_out
 }

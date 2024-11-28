@@ -13,3 +13,7 @@ serde = { version = "1.0", features = ["derive"] }
 [[bin]]
 name = "handler"
 path = "api/handler.rs"
+
+[[bin]]
+name = "hello_world"
+path = "api/hello_world.rs"
