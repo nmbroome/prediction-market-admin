@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState } from 'react';
 import { NextPage } from 'next';
@@ -26,6 +26,7 @@ const MarketMakerTestPage: NextPage = () => {
   const [inputToken, setInputToken] = useState('TokenA');
   const [amountIn, setAmountIn] = useState<number>(0);
   const [result, setResult] = useState<SwapResponse | null>(null);
+  const [marketMaker, setMarketMaker] = useState<'cpmm' | 'maniswap'>('cpmm');
 
   const handleSwap = async () => {
     const swapData: SwapRequest = {
@@ -38,7 +39,8 @@ const MarketMakerTestPage: NextPage = () => {
     };
 
     try {
-      const response = await fetch('/api/handler', {
+      const endpoint = marketMaker === 'cpmm' ? '/api/handler' : '/api/maniswap';
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,8 +65,19 @@ const MarketMakerTestPage: NextPage = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black text-black">
       <div className="flex flex-col items-center bg-gray-100 p-4 rounded-md shadow-md w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4">Constant Product Market Maker Test</h2>
+        <h2 className="text-xl font-semibold mb-4">Market Maker Test</h2>
         <div className="flex flex-col gap-4 w-full">
+          <div>
+            <label className="block font-medium">Market Maker Type:</label>
+            <select
+              value={marketMaker}
+              onChange={(e) => setMarketMaker(e.target.value as 'cpmm' | 'maniswap')}
+              className="w-full p-2 border border-gray-300 rounded-md"
+            >
+              <option value="cpmm">CPMM (Constant Product Market Maker)</option>
+              <option value="maniswap">Maniswap (Manifold Markets)</option>
+            </select>
+          </div>
           <div>
             <label className="block font-medium">Token A:</label>
             <input
