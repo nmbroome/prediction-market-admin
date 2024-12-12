@@ -25,6 +25,7 @@ export default function MarketDetails() {
   const { id } = useParams();
   const [market, setMarket] = useState<Market | null>(null);
   const [answers, setAnswers] = useState<Answer[]>([]);
+  const [amountIn, setAmountIn] = useState<number>(10); // Default amount to trade
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -62,18 +63,17 @@ export default function MarketDetails() {
   const handleButtonClick = async (answer: Answer) => {
     setError(null);
     setSuccess(null);
-  
+
     if (!market) {
       setError("Market data not available.");
       return;
     }
-  
+
     const reserveA = answers[0].tokens; // Reserve of Token A
     const reserveB = answers[1]?.tokens || 0; // Reserve of Token B
-    const amountIn = 10; // Example input amount, can be customized
-  
+
     try {
-      const response = await fetch("/api/handler", {
+      const response = await fetch("https://prediction-market-iota.vercel.app/api/handler", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -87,7 +87,7 @@ export default function MarketDetails() {
           amount_in: amountIn,
         }),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.text();
         setError(`API error: ${errorData}`);
@@ -105,7 +105,7 @@ export default function MarketDetails() {
       console.error("API call error:", err);
       setError("Failed to call market maker.");
     }
-  };  
+  };
 
   if (!market) return <div>Loading...</div>;
 
@@ -120,6 +120,22 @@ export default function MarketDetails() {
         <strong>Market Maker:</strong> {market.market_maker}
       </p>
 
+      {/* Amount to Trade Input */}
+      <div className="mt-6">
+        <label htmlFor="amountIn" className="block text-sm font-medium text-white">
+          Amount to Trade:
+        </label>
+        <input
+          type="number"
+          id="amountIn"
+          value={amountIn}
+          onChange={(e) => setAmountIn(Number(e.target.value))}
+          min="1"
+          className="mt-1 block w-fit px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-black"
+        />
+      </div>
+
+      {/* Display answers as buttons */}
       <div className="mt-6">
         <h2 className="text-xl font-semibold">Possible Answers</h2>
         {answers.length > 0 ? (
