@@ -63,15 +63,15 @@ export default function MarketDetails() {
   const handleButtonClick = async (answer: Answer) => {
     setError(null);
     setSuccess(null);
-
+  
     if (!market) {
       setError("Market data not available.");
       return;
     }
-
+  
     const reserveA = answers[0].tokens; // Reserve of Token A
     const reserveB = answers[1]?.tokens || 0; // Reserve of Token B
-
+  
     try {
       const response = await fetch("https://prediction-market-iota.vercel.app/api/handler", {
         method: "POST",
@@ -87,12 +87,46 @@ export default function MarketDetails() {
           amount_in: amountIn,
         }),
       });
-
+  
       if (!response.ok) {
         const errorData = await response.text();
         setError(`API error: ${errorData}`);
       } else {
         const data = await response.json();
+  
+        // Update Supabase with new reserves
+        const updatedAnswers = answers.map((ans) => {
+          if (ans.name === answers[0].name) {
+            return { ...ans, tokens: data.new_reserve_a };
+          } else if (ans.name === answers[1]?.name) {
+            return { ...ans, tokens: data.new_reserve_b };
+          }
+          return ans;
+        });
+  
+        // Update answers in Supabase
+        const updatePromises = updatedAnswers.map((updatedAnswer) =>
+          supabase
+            .from("answers")
+            .update({ tokens: updatedAnswer.tokens })
+            .eq("id", updatedAnswer.id)
+        );
+  
+        await Promise.all(updatePromises);
+  
+        // Update market token pool in Supabase
+        const newTokenPool = data.new_reserve_a + data.new_reserve_b;
+        await supabase
+          .from("markets")
+          .update({ token_pool: newTokenPool })
+          .eq("id", market.id);
+  
+        // Set updated state
+        setAnswers(updatedAnswers);
+        setMarket((prevMarket) =>
+          prevMarket ? { ...prevMarket, token_pool: newTokenPool } : null
+        );
+  
         setSuccess(
           `Swap successful! Received ${data.amount_out.toFixed(
             2
@@ -105,7 +139,7 @@ export default function MarketDetails() {
       console.error("API call error:", err);
       setError("Failed to call market maker.");
     }
-  };
+  };  
 
   if (!market) return <div>Loading...</div>;
 
