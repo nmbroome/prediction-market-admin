@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { useState } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser-client';
@@ -15,6 +15,7 @@ export default function CreateMarketForm() {
   const [description, setDescription] = useState('');
   const [tokens, setTokens] = useState(100);
   const [marketMaker, setMarketMaker] = useState('CPMM');
+  const [initialProbability, setInitialProbability] = useState(50); // Initial probability for Maniswap
   const [answers, setAnswers] = useState<{ answer: string; token_pool: number }[]>([
     { answer: '', token_pool: 50 },
     { answer: '', token_pool: 50 },
@@ -65,6 +66,7 @@ export default function CreateMarketForm() {
         market_maker: marketMaker,
         creator_id: userId,
         created_at: new Date().toISOString(),
+        initial_probability: marketMaker === 'Maniswap' ? initialProbability : null, // Include initial probability for Maniswap
       }
     ]).select('*').single();
 
@@ -142,6 +144,21 @@ export default function CreateMarketForm() {
           <option value="Maniswap">Maniswap</option>
         </select>
       </div>
+      {marketMaker === 'Maniswap' && (
+        <div className="mb-4">
+          <label htmlFor="initialProbability" className="block text-sm font-medium text-gray-700">Initial Probability (%):</label>
+          <input
+            type="number"
+            id="initialProbability"
+            value={initialProbability}
+            onChange={(e) => setInitialProbability(Number(e.target.value))}
+            required
+            min="0"
+            max="100"
+            className="text-black mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          />
+        </div>
+      )}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700">Initial Answers:</label>
         {answers.map((answer, index) => (

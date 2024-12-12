@@ -77,12 +77,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
 }
 
 fn maniswap_swap(reserve_in: f64, reserve_out: f64, amount_in: f64) -> f64 {
-    // Maniswap protocol formula: y^p * n^(1-p) = k
-    // Assume p = 0.5 for simplicity, but this can be adjusted.
-    let p = 0.5;
-    let y = reserve_out;
-    let n = reserve_in + amount_in;
-    let k = (y.powf(p)) * (n.powf(1.0 - p));
-    let new_y = k / n.powf(1.0 - p);
-    y - new_y
+    let new_reserve_in = reserve_in + amount_in;
+    let amount_out = reserve_out - (reserve_in * reserve_out) / new_reserve_in;
+    amount_out
 }
