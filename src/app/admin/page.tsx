@@ -2,8 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import Table from "@/components/Market-Table";
+import { Markets } from "@/lib/types";
 
 export default function Admin() {
+
+    const sampleData: Markets[] = [
+        {
+          marketName: "Test",
+          description: "Test market description",
+          tokenPool: "250",
+          marketMaker: "CPMM",
+        },
+      ];
+
 
     const supabase = createSupabaseBrowserClient();
     const [userId, setUserId] = useState<string | null>(null);
@@ -34,23 +46,8 @@ export default function Admin() {
         </h1>
       </div>
 
-      {/* Table */}
-      <div className="flex items-center justify-center">
-        <h2>Market list</h2>
-        <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-          <thead>
-            <tr className="bg-gray-800 text-white border-b">
-              <th className="px-4 py-2">Market Name</th>
-              <th className="px-4 py-2">Description</th>
-              <th className="px-4 py-2">Token Pool</th>
-              <th className="px-4 py-2">Market Maker</th>
-            </tr>
-          </thead>
-          <tbody>
-
-          </tbody>
-        </table>
-      </div>
+      <h2>Market list</h2>
+      <Table data={sampleData}/>
     </div>
   );
 }
