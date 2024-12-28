@@ -4,3 +4,9 @@ export type Markets = {
     tokenPool: string;
     marketMaker: string;
 };
+
+export type Predictions = {
+    marketName: string;
+    tokenAmount: string;
+    outcomeId: string;
+};
