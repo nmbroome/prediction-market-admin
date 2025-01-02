@@ -45,7 +45,7 @@ export default function MarketDetails() {
         }
 
         const { data: answersData, error: answersError } = await supabase
-          .from("answers")
+          .from("outcomes")
           .select("id, name, tokens, market_id")
           .eq("market_id", id);
 
