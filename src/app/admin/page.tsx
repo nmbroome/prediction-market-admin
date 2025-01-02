@@ -29,6 +29,8 @@ export default function Admin() {
     };
 
     fetchUser();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
