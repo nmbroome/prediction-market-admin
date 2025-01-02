@@ -82,7 +82,7 @@ export default function CreateMarketForm() {
         created_at: new Date().toISOString(),
       }));
 
-      const { error: answersError } = await supabase.from('answers').insert(answerInsertions);
+      const { error: answersError } = await supabase.from('outcomes').insert(answerInsertions);
 
       if (answersError) {
         setError('Failed to add answers to the market');
@@ -186,7 +186,7 @@ export default function CreateMarketForm() {
           onClick={addAnswerField}
           className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
-          Add Another Answer
+          Add Another Outcome
         </button>
       </div>
       <button
