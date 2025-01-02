@@ -80,7 +80,7 @@ const PredictionsTable = () => {
               <th className="px-4 py-2">Return Amount</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="text-black text-center">
             {predictions.map((row, index) => (
               <tr
                 key={row.predictionId}

@@ -42,7 +42,7 @@ export default function Admin() {
       <div className="flex justify-center space-x-4 mb-4">
         <button
           className={`px-4 py-2 rounded ${
-            activeTable === "markets" ? "bg-blue-500 text-white" : "bg-gray-200"
+            activeTable === "markets" ? "bg-blue-500 text-white" : "bg-gray-200 text-black"
           }`}
           onClick={() => setActiveTable("markets")}
         >
@@ -52,7 +52,7 @@ export default function Admin() {
           className={`px-4 py-2 rounded ${
             activeTable === "predictions"
               ? "bg-blue-500 text-white"
-              : "bg-gray-200"
+              : "bg-gray-200 text-black"
           }`}
           onClick={() => setActiveTable("predictions")}
         >
