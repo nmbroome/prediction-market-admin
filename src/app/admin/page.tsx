@@ -4,26 +4,8 @@ import { useEffect, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import MarketTable from "@/components/MarketTable";
 import PredictionsTable from "@/components/PredictionHistory";
-import { Markets, Predictions } from "@/lib/types";
-
 
 export default function Admin() {
-  const sampleData: Markets[] = [
-    {
-      marketName: "Test",
-      description: "Test market description",
-      tokenPool: "250",
-      marketMaker: "CPMM",
-    },
-  ];
-
-  const predictionData: Predictions[] = [
-    {
-      marketName: "Test",
-      tokenAmount: "10",
-      outcomeId: "Yes",
-    },
-  ];
 
   const supabase = createSupabaseBrowserClient();
   const [userId, setUserId] = useState<string | null>(null);
@@ -79,14 +61,14 @@ export default function Admin() {
       {activeTable === "markets" ? (
         <div>
           <h2 className="text-center text-xl font-bold mb-4">Markets Table</h2>
-          <MarketTable data={sampleData} />
+          <MarketTable />
         </div>
       ) : (
         <div>
           <h2 className="text-center text-xl font-bold mb-4">
             Predictions Table
           </h2>
-          <PredictionsTable data={predictionData} />
+          <PredictionsTable />
         </div>
       )}
     </div>
