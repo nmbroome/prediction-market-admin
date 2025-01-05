@@ -61,7 +61,7 @@ export default function Admin() {
       {activeTable === "markets" ? (
         <div>
           <h2 className="text-center text-xl font-bold mb-4">Markets Table</h2>
-          <MarketTable />
+          
         </div>
       ) : (
         <div>
