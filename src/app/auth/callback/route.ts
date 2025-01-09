@@ -5,21 +5,26 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
 
   const code = searchParams.get("code");
-
-  // if "next" is in param, use it in the redirect URL
   const next = searchParams.get("next") ?? "/";
 
   if (code) {
     const supabase = createSupabaseServerClient();
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    try {
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (!error) {
+      if (error) {
+        console.error("Error exchanging code for session:", error.message);
+        return NextResponse.redirect(`${origin}/auth/auth-error`);
+      }
+
       return NextResponse.redirect(`${origin}${next}`);
+    } catch (error) {
+      console.error("Unexpected error during auth callback:", error);
+      return NextResponse.redirect(`${origin}/auth/auth-error`);
     }
   }
 
-  // TODO: Create this page
-  // return the user to an error page with instructions
+  console.error("Missing 'code' parameter in callback URL.");
   return NextResponse.redirect(`${origin}/auth/auth-error`);
 }
