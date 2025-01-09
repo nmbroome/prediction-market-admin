@@ -9,7 +9,6 @@ const supabase = createSupabaseBrowserClient();
 const PredictionsTable = () => {
   const [predictions, setPredictions] = useState<Predictions[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserAndPredictions = async () => {
@@ -24,8 +23,6 @@ const PredictionsTable = () => {
 
         if (userError) throw userError;
         if (!user) throw new Error("No authenticated user found");
-
-        setUserId(user.id);
 
         // Fetch predictions for the current user
         const { data: predictionsData, error: predictionsError } = await supabase
@@ -83,7 +80,7 @@ const PredictionsTable = () => {
               <th className="px-4 py-2">Return Amount</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="text-black text-center">
             {predictions.map((row, index) => (
               <tr
                 key={row.predictionId}

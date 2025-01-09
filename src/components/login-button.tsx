@@ -9,11 +9,9 @@ export default function LoginButton(props: { nextUrl?: string }) {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${location.origin}/auth/callback?next=${
-          props.nextUrl || ""
-        }`,
+        redirectTo: `${location.origin}/auth/callback?next=${props.nextUrl || ""}`,
       },
-    });
+    });    
   };
 
   return <button onClick={handleLogin}>Login</button>;

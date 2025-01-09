@@ -67,7 +67,7 @@ const MarketsPage: React.FC<MarketsPageProps> = ({ markets }) => {
               <th className="px-4 py-2">Outcome</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="text-black text-center">
             {filteredMarkets.map((row, index) => (
               <tr
                 key={row.marketId}
