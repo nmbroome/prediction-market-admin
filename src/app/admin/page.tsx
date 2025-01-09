@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser-client";
-import MarketTable from "@/components/MarketTable";
 import PredictionsTable from "@/components/PredictionHistory";
 
 export default function Admin() {
