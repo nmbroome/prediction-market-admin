@@ -15,6 +15,7 @@ export default async function Navbar() {
         <Link href="/markets">
           Markets
         </Link>
+        {user && <Link href="/profile">Profile</Link>}
         {user ? <LogoutButton /> : <LoginButton />}
       </div>
     </nav>
