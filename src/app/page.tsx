@@ -1,5 +1,4 @@
 import Navbar from "@/components/navbar";
-import CreateMarketForm from "@/components/CreateMarket";
 
 export default function Home() {
   return (
