@@ -1,7 +1,7 @@
 import React from "react";
 
 export default function UserProfile() {
-    <div className="container mt-4">
+    <div className="container mt-4 text-white">
         <h2>Your Profile</h2>
         <div className="mt-4">
             <div className="flex-col">
