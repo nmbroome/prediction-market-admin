@@ -1,9 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-import { createSupabaseBrowserClient } from '@/lib/supabase/browser-client';
-
-const supabase = createSupabaseBrowserClient();
+import supabase from "@/lib/supabase/createClient";
 
 const getUserId = async () => {
   const { data: { user } } = await supabase.auth.getUser();

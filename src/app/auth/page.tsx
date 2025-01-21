@@ -1,8 +1,8 @@
 "use client";
 
-import { createSupabaseBrowserClient } from '@/lib/supabase/browser-client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import supabase from '@/lib/supabase/createClient';
 
 export default function AuthPage() {
   const [email, setEmail] = useState('');
@@ -10,16 +10,17 @@ export default function AuthPage() {
   const [message, setMessage] = useState('');
 
   const router = useRouter();
-  const supabase = createSupabaseBrowserClient();
 
   const handleSignUp = async () => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
     });
     if (error) {
+      console.error('Error signing up:', error.message);
       setMessage(`Error: ${error.message}`);
     } else {
+      console.log('Sign-up successful:', data);
       setMessage('Signup successful! Please check your email to confirm.');
     }
   };

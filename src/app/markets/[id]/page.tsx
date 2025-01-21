@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser-client";
-
-const supabase = createSupabaseBrowserClient();
+import supabase from "@/lib/supabase/createClient";
 
 interface Market {
   id: number;

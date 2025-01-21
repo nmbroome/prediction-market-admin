@@ -1,4 +1,4 @@
-import { createSupabaseBrowserClient } from "./supabase/browser-client";
+import supabase from "@/lib/supabase/createClient";
 
 interface Market {
   id: number;
@@ -9,8 +9,6 @@ interface Market {
 }
 
 export async function getMarkets(): Promise<Market[] | null> {
-  const supabase = createSupabaseBrowserClient();
-
   const { data, error } = await supabase
     .from('markets')
     .select('id, name, description, token_pool, market_maker');

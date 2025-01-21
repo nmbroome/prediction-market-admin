@@ -1,15 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import supabase from '@/lib/supabase/createClient';
 import { User } from "@supabase/supabase-js";
 import Onboarding from "@/components/Onboarding";
 
 export default function UserProfile() {
   const [user, setUser] = useState<User | null>(null);
   const [isInUserInfo, setIsInUserInfo] = useState<boolean | null>(null);
-
-  const supabase = createSupabaseBrowserClient();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -42,7 +40,7 @@ export default function UserProfile() {
     };
 
     fetchUserData();
-  }, [supabase]);
+  }, []);
 
   if (isInUserInfo === null) {
     return <p>Loading user data...</p>;

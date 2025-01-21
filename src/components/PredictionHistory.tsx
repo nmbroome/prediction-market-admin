@@ -2,9 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Predictions } from "@/lib/types";
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser-client";
-
-const supabase = createSupabaseBrowserClient();
+import supabase from "@/lib/supabase/createClient";
 
 const PredictionsTable = () => {
   const [predictions, setPredictions] = useState<Predictions[]>([]);

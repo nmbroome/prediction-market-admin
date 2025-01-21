@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import supabase from "@/lib/supabase/createClient";
 
 export default function Onboarding() {
   const [paymentType, setPaymentType] = useState("PayPal");
   const [paymentEmail, setPaymentEmail] = useState("");
   const [message, setMessage] = useState("");
-
-  const supabase = createSupabaseBrowserClient();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

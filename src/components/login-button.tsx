@@ -1,9 +1,8 @@
 "use client";
 
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import supabase from "@/lib/supabase/createClient";
 
 export default function LoginButton(props: { nextUrl?: string }) {
-  const supabase = createSupabaseBrowserClient();
 
   const handleLogin = async () => {
     const redirectUrl = `${location.origin}/auth/callback?next=${props.nextUrl || ""}`;
