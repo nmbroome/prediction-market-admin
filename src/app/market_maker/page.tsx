@@ -3,21 +3,6 @@
 import { useState } from 'react';
 import { NextPage } from 'next';
 
-interface SwapRequest {
-  token_a: string;
-  reserve_a: number;
-  token_b: string;
-  reserve_b: number;
-  input_token: string;
-  amount_in: number;
-}
-
-interface SwapResponse {
-  amount_out: number;
-  new_reserve_a: number;
-  new_reserve_b: number;
-}
-
 const MarketMakerTestPage: NextPage = () => {
   const [tokenA, setTokenA] = useState('TokenA');
   const [tokenB, setTokenB] = useState('TokenB');
@@ -25,42 +10,7 @@ const MarketMakerTestPage: NextPage = () => {
   const [reserveB, setReserveB] = useState<number>(1000);
   const [inputToken, setInputToken] = useState('TokenA');
   const [amountIn, setAmountIn] = useState<number>(0);
-  const [result, setResult] = useState<SwapResponse | null>(null);
   const [marketMaker, setMarketMaker] = useState<'cpmm' | 'maniswap'>('cpmm');
-
-  const handleSwap = async () => {
-    const swapData: SwapRequest = {
-      token_a: tokenA,
-      reserve_a: reserveA,
-      token_b: tokenB,
-      reserve_b: reserveB,
-      input_token: inputToken,
-      amount_in: amountIn,
-    };
-
-    try {
-      const endpoint = marketMaker === 'cpmm' ? '/api/handler' : '/api/maniswap';
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(swapData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch data from API');
-      }
-
-      const data: SwapResponse = await response.json();
-      setResult(data);
-      setReserveA(data.new_reserve_a);
-      setReserveB(data.new_reserve_b);
-    } catch (error) {
-      console.error('Error swapping tokens:', error);
-      setResult(null);
-    }
-  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black text-black">
@@ -135,21 +85,18 @@ const MarketMakerTestPage: NextPage = () => {
             />
           </div>
           <button
-            onClick={handleSwap}
             className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition-colors"
           >
             Swap Tokens
           </button>
         </div>
       </div>
-      {result && (
         <div className="mt-4 p-4 bg-white shadow-md rounded-md">
           <h3 className="text-lg font-semibold">Swap Result:</h3>
-          <p>Amount Out: {result.amount_out}</p>
-          <p>New Reserve A: {result.new_reserve_a}</p>
-          <p>New Reserve B: {result.new_reserve_b}</p>
+          <p>Amount Out: </p>
+          <p>New Reserve A: </p>
+          <p>New Reserve B: </p>
         </div>
-      )}
     </div>
   );
 };
