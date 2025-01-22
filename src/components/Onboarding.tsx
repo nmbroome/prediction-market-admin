@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import supabase from "@/lib/supabase/createClient";
+import Navbar from "./navbar";
 
 export default function Onboarding() {
   const [paymentType, setPaymentType] = useState("PayPal");
@@ -28,7 +29,7 @@ export default function Onboarding() {
       mturk_info: paymentType === "MTurk" ? paymentEmail : null,
     };
 
-    const { error } = await supabase.from("user_info").insert(userInfoData);
+    const { error } = await supabase.from("profiles").insert(userInfoData);
 
     if (error) {
       setMessage("Error saving user information: " + error.message);
@@ -39,6 +40,7 @@ export default function Onboarding() {
 
   return (
     <div className="container mx-auto mt-8 p-4 max-w-md bg-white text-black rounded shadow">
+      <Navbar />
       <h2 className="text-xl font-bold mb-4">Complete Your Onboarding</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
