@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import supabase from '@/lib/supabase/createClient';
 import { User } from "@supabase/supabase-js";
 import Onboarding from "@/components/Onboarding";
-import IQTest from "@/components/IQTest";
+//import IQTest from "@/components/IQTest";
 
 export default function UserProfile() {
   const [user, setUser] = useState<User | null>(null);
