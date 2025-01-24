@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import supabase from '@/lib/supabase/createClient';
 import { User } from "@supabase/supabase-js";
 import Onboarding from "@/components/Onboarding";
+import IQTest from "@/components/IQTest";
 
 export default function UserProfile() {
   const [user, setUser] = useState<User | null>(null);
@@ -23,7 +24,7 @@ export default function UserProfile() {
 
       if (userData.user) {
         const { data: userInfoData, error: userInfoError } = await supabase
-          .from("user_info")
+          .from("profiles")
           .select("id")
           .eq("id", userData.user.id)
           .single();
