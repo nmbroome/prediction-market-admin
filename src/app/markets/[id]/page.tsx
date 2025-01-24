@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import supabase from "@/lib/supabase/createClient";
 
@@ -27,93 +27,81 @@ export default function MarketDetails() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Move `fetchMarketData` out of `useEffect`
-  const fetchMarketData = async () => {
+  const fetchMarketData = useCallback(async () => {
     if (id) {
       const { data: marketData, error: marketError } = await supabase
         .from("markets")
         .select("id, name, description, token_pool, market_maker")
         .eq("id", id)
         .single();
-
+  
       if (marketError) {
         console.error("Error fetching market:", marketError.message);
       } else {
         setMarket(marketData as Market);
       }
-
+  
       const { data: answersData, error: answersError } = await supabase
         .from("outcomes")
         .select("id, name, tokens, market_id")
         .eq("market_id", id);
-
+  
       if (answersError) {
         console.error("Error fetching answers:", answersError.message);
       } else {
         setAnswers(answersData as Answer[]);
       }
     }
-  };
-
-  // Use the reusable `fetchMarketData` in `useEffect`
-  useEffect(() => {
-    fetchMarketData();
   }, [id]);
 
-  const handleButtonClick = async (answer: Answer) => {
-    setError(null);
-    setSuccess(null);
+  // Use the reusable `fetchMarketData` in `useEffect`
+useEffect(() => {
+  fetchMarketData();
+}, [fetchMarketData]);
 
-    if (!market || answers.length < 2) {
-      setError("Market data or answers are incomplete.");
-      return;
-    }
+const handleButtonClick = async (answer: Answer) => {
+  setError(null);
+  setSuccess(null);
 
-    const reserveA = answers[0].tokens; // Reserve of Token A
-    const reserveB = answers[1].tokens; // Reserve of Token B
-    const k = reserveA * reserveB; // Constant product
+  if (!market) {
+    setError("Market data is not available.");
+    return;
+  }
 
-    // Determine the new reserve of Token B after adding `amountIn` to Token A
-    const newReserveA = reserveA + amountIn;
-    const newReserveB = k / newReserveA;
+  const reserveA = answer.tokens; // Reserve of the clicked answer
+  const otherAnswers = answers.filter((a) => a.id !== answer.id);
+  const reserveB = otherAnswers.reduce((sum, a) => sum + a.tokens, 0); // Sum of other tokens
+  const k = reserveA * reserveB;
 
-    const tokensPurchased = reserveB - newReserveB;
+  const newReserveA = reserveA + amountIn;
+  const newReserveB = k / newReserveA;
 
-    if (tokensPurchased <= 0) {
-      setError("Trade failed: Insufficient liquidity.");
-      return;
-    }
+  const tokensPurchased = reserveB - newReserveB;
 
-    // Update the tokens on the server (pseudo-code)
-    const { error: updateError } = await supabase
-      .from("outcomes")
-      .update({ tokens: newReserveA })
-      .eq("id", answers[0].id);
+  if (tokensPurchased <= 0) {
+    setError("Trade failed: Insufficient liquidity.");
+    return;
+  }
 
-    if (updateError) {
-      setError("Failed to update reserves.");
-      return;
-    }
+  const { error: updateError } = await supabase
+    .from("outcomes")
+    .update({ tokens: newReserveA })
+    .eq("id", answer.id);
 
-    const { error: updateErrorB } = await supabase
-      .from("outcomes")
-      .update({ tokens: newReserveB })
-      .eq("id", answers[1].id);
+  if (updateError) {
+    setError("Failed to update reserves.");
+    return;
+  }
 
-    if (updateErrorB) {
-      setError("Failed to update reserves for Token B.");
-      return;
-    }
+  setSuccess(
+    `Trade successful! You purchased ${tokensPurchased.toFixed(
+      2
+    )} tokens for ${amountIn} Token A.`
+  );
 
-    setSuccess(
-      `Trade successful! You purchased ${tokensPurchased.toFixed(
-        2
-      )} tokens for ${amountIn} Token A.`
-    );
+  await fetchMarketData();
+};
 
-    // Refresh market and answers after the trade
-    await fetchMarketData();
-  };
 
   if (!market) return <div>Loading...</div>;
 
