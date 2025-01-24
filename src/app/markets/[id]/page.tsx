@@ -23,121 +23,97 @@ export default function MarketDetails() {
   const { id } = useParams();
   const [market, setMarket] = useState<Market | null>(null);
   const [answers, setAnswers] = useState<Answer[]>([]);
-  const [amountIn, setAmountIn] = useState<number>(10); // Default amount to trade
+  const [amountIn, setAmountIn] = useState<number>(10);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchMarketData() {
-      if (id) {
-        const { data: marketData, error: marketError } = await supabase
-          .from("markets")
-          .select("id, name, description, token_pool, market_maker")
-          .eq("id", id)
-          .single();
+  // Move `fetchMarketData` out of `useEffect`
+  const fetchMarketData = async () => {
+    if (id) {
+      const { data: marketData, error: marketError } = await supabase
+        .from("markets")
+        .select("id, name, description, token_pool, market_maker")
+        .eq("id", id)
+        .single();
 
-        if (marketError) {
-          console.error("Error fetching market:", marketError.message);
-        } else {
-          setMarket(marketData as Market);
-        }
+      if (marketError) {
+        console.error("Error fetching market:", marketError.message);
+      } else {
+        setMarket(marketData as Market);
+      }
 
-        const { data: answersData, error: answersError } = await supabase
-          .from("outcomes")
-          .select("id, name, tokens, market_id")
-          .eq("market_id", id);
+      const { data: answersData, error: answersError } = await supabase
+        .from("outcomes")
+        .select("id, name, tokens, market_id")
+        .eq("market_id", id);
 
-        if (answersError) {
-          console.error("Error fetching answers:", answersError.message);
-        } else {
-          setAnswers(answersData as Answer[]);
-        }
+      if (answersError) {
+        console.error("Error fetching answers:", answersError.message);
+      } else {
+        setAnswers(answersData as Answer[]);
       }
     }
+  };
 
+  // Use the reusable `fetchMarketData` in `useEffect`
+  useEffect(() => {
     fetchMarketData();
   }, [id]);
 
   const handleButtonClick = async (answer: Answer) => {
     setError(null);
     setSuccess(null);
-  
-    if (!market) {
-      setError("Market data not available.");
+
+    if (!market || answers.length < 2) {
+      setError("Market data or answers are incomplete.");
       return;
     }
-  
+
     const reserveA = answers[0].tokens; // Reserve of Token A
-    const reserveB = answers[1]?.tokens || 0; // Reserve of Token B
-  
-    try {
-      const response = await fetch("https://prediction-market-iota.vercel.app/api/handler", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token_a: answers[0].name, // Assuming Token A is the first answer
-          reserve_a: reserveA,
-          token_b: answers[1]?.name || "", // Assuming Token B is the second answer
-          reserve_b: reserveB,
-          input_token: answer.name, // The token being swapped (clicked answer)
-          amount_in: amountIn,
-        }),
-      });
-  
-      if (!response.ok) {
-        const errorData = await response.text();
-        setError(`API error: ${errorData}`);
-      } else {
-        const data = await response.json();
-  
-        // Update Supabase with new reserves
-        const updatedAnswers = answers.map((ans) => {
-          if (ans.name === answers[0].name) {
-            return { ...ans, tokens: data.new_reserve_a };
-          } else if (ans.name === answers[1]?.name) {
-            return { ...ans, tokens: data.new_reserve_b };
-          }
-          return ans;
-        });
-  
-        // Update answers in Supabase
-        const updatePromises = updatedAnswers.map((updatedAnswer) =>
-          supabase
-            .from("answers")
-            .update({ tokens: updatedAnswer.tokens })
-            .eq("id", updatedAnswer.id)
-        );
-  
-        await Promise.all(updatePromises);
-  
-        // Update market token pool in Supabase
-        const newTokenPool = data.new_reserve_a + data.new_reserve_b;
-        await supabase
-          .from("markets")
-          .update({ token_pool: newTokenPool })
-          .eq("id", market.id);
-  
-        // Set updated state
-        setAnswers(updatedAnswers);
-        setMarket((prevMarket) =>
-          prevMarket ? { ...prevMarket, token_pool: newTokenPool } : null
-        );
-  
-        setSuccess(
-          `Swap successful! Received ${data.amount_out.toFixed(
-            2
-          )}. New reserves: A=${data.new_reserve_a.toFixed(
-            2
-          )}, B=${data.new_reserve_b.toFixed(2)}`
-        );
-      }
-    } catch (err) {
-      console.error("API call error:", err);
-      setError("Failed to call market maker.");
+    const reserveB = answers[1].tokens; // Reserve of Token B
+    const k = reserveA * reserveB; // Constant product
+
+    // Determine the new reserve of Token B after adding `amountIn` to Token A
+    const newReserveA = reserveA + amountIn;
+    const newReserveB = k / newReserveA;
+
+    const tokensPurchased = reserveB - newReserveB;
+
+    if (tokensPurchased <= 0) {
+      setError("Trade failed: Insufficient liquidity.");
+      return;
     }
-  };  
+
+    // Update the tokens on the server (pseudo-code)
+    const { error: updateError } = await supabase
+      .from("outcomes")
+      .update({ tokens: newReserveA })
+      .eq("id", answers[0].id);
+
+    if (updateError) {
+      setError("Failed to update reserves.");
+      return;
+    }
+
+    const { error: updateErrorB } = await supabase
+      .from("outcomes")
+      .update({ tokens: newReserveB })
+      .eq("id", answers[1].id);
+
+    if (updateErrorB) {
+      setError("Failed to update reserves for Token B.");
+      return;
+    }
+
+    setSuccess(
+      `Trade successful! You purchased ${tokensPurchased.toFixed(
+        2
+      )} tokens for ${amountIn} Token A.`
+    );
+
+    // Refresh market and answers after the trade
+    await fetchMarketData();
+  };
 
   if (!market) return <div>Loading...</div>;
 
@@ -180,7 +156,10 @@ export default function MarketDetails() {
               >
                 <span className="block text-lg font-medium">{answer.name}</span>
                 <span className="block text-sm">
-                  {(answer.tokens / market.token_pool * 100).toFixed(2)}%
+                  {/* Safeguard to ensure valid market and token_pool */}
+                  {market?.token_pool
+                    ? ((answer.tokens / market.token_pool) * 100).toFixed(2) + "%"
+                    : "N/A"}
                 </span>
               </button>
             ))}

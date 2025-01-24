@@ -5,6 +5,9 @@ import supabase from "@/lib/supabase/createClient";
 
 const getUserId = async () => {
   const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    console.log(user.id)
+  }
   return user ? user.id : null;
 };
 
@@ -64,7 +67,6 @@ export default function CreateMarketForm() {
         market_maker: marketMaker,
         creator_id: userId,
         created_at: new Date().toISOString(),
-        initial_probability: marketMaker === 'Maniswap' ? initialProbability : null, // Include initial probability for Maniswap
       }
     ]).select('*').single();
 
