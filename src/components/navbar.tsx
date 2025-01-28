@@ -1,11 +1,11 @@
-import supabase from "@/lib/supabase/createClient";
+import { createSupabaseServerComponentClient } from "@/lib/supabase/server-client";
 import LogoutButton from "./logout-button";
 import Link from "next/link";
 
 export default async function Navbar() {
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await (await createSupabaseServerComponentClient()).auth.getUser();
 
   return (
     <nav className="flex w-full justify-between items-center p-4 bg-transparent text-white">
