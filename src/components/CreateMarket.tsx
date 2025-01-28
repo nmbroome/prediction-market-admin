@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import supabase from "@/lib/supabase/createClient";
+import { Market, addMarket } from '@/lib/addMarket';
+import { addAnswers } from '@/lib/addAnswers';
 
 const getUserId = async () => {
   const { data: { user } } = await supabase.auth.getUser();
   if (user) {
-    console.log(user.id)
+    console.log(user.id);
   }
   return user ? user.id : null;
 };
@@ -32,7 +34,6 @@ export default function CreateMarketForm() {
     };
     setAnswers(newAnswers);
 
-    // Update total tokens if token_pool is changed
     if (field === 'token_pool') {
       const totalTokens = newAnswers.reduce((acc, answer) => acc + answer.token_pool, 0);
       setTokens(totalTokens);
@@ -44,58 +45,46 @@ export default function CreateMarketForm() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+  
     const userId = await getUserId();
     if (!userId) {
       setError('User is not logged in.');
       return;
     }
-    e.preventDefault();
-    setError(null);
-    setSuccess(null);
-
+  
     const totalAnswerTokens = answers.reduce((acc, answer) => acc + answer.token_pool, 0);
     if (totalAnswerTokens !== tokens) {
       setError('The total of all answer token pools must equal the total market tokens.');
       return;
     }
-
-    const { data: market, error: insertError } = await supabase.from('markets').insert([
-      {
-        name,
-        description,
-        token_pool: tokens,
-        market_maker: marketMaker,
-        creator_id: userId,
-        created_at: new Date().toISOString(),
-      }
-    ]).select('*').single();
-
-    if (insertError || !market) {
-      setError(insertError?.message || 'Failed to create market');
-    } else {
-      const { id: marketId } = market;
-      const answerInsertions = answers.map((answer) => ({
-        market_id: marketId,
-        creator_id: userId,
-        name: answer.answer,
-        tokens: answer.token_pool,
-        created_at: new Date().toISOString(),
-      }));
-
-      const { error: answersError } = await supabase.from('outcomes').insert(answerInsertions);
-
-      if (answersError) {
-        setError('Failed to add answers to the market');
-      } else {
-        setSuccess('Market and answers created successfully!');
-        setTokens(totalAnswerTokens);
-        setName('');
-        setDescription('');
-        setTokens(0);
-        setAnswers([{ answer: '', token_pool: 0 }]);
-      }
+  
+    const market: Market = {
+      creator_id: userId,
+      name,
+      description,
+      token_pool: tokens,
+      market_maker: marketMaker,
+    };
+  
+    try {
+      const createdMarket = await addMarket(market);
+  
+      // Call the addAnswers function
+      await addAnswers(createdMarket.id, userId, answers);
+  
+      setSuccess('Market and answers created successfully!');
+      setName('');
+      setDescription('');
+      setTokens(0);
+      setAnswers([{ answer: '', token_pool: 0 }]);
+    } catch (err) {
+      setError((err as Error).message || 'Failed to create market or add answers.');
     }
   };
+  
 
   return (
     <form onSubmit={handleSubmit} className="max-w-lg mx-auto p-6 bg-gray-100 rounded-lg shadow-md">
