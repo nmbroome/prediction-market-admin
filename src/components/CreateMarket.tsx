@@ -4,6 +4,7 @@ import { useState } from 'react';
 import supabase from "@/lib/supabase/createClient";
 import { Market, addMarket } from '@/lib/addMarket';
 import { addAnswers } from '@/lib/addAnswers';
+import { MARKET_TAGS } from '@/lib/constants'; // Adjust the path as needed
 
 const getUserId = async () => {
   const { data: { user } } = await supabase.auth.getUser();
@@ -23,6 +24,7 @@ export default function CreateMarketForm() {
     { answer: '', token_pool: 50 },
     { answer: '', token_pool: 50 },
   ]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -42,6 +44,13 @@ export default function CreateMarketForm() {
 
   const addAnswerField = () => {
     setAnswers([...answers, { answer: '', token_pool: 0 }]);
+  };
+
+  // Toggle tag selection for checkboxes
+  const handleTagToggle = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,6 +76,7 @@ export default function CreateMarketForm() {
       description,
       token_pool: tokens,
       market_maker: marketMaker,
+      tags: selectedTags // include the selected tags here
     };
   
     try {
@@ -80,6 +90,7 @@ export default function CreateMarketForm() {
       setDescription('');
       setTokens(0);
       setAnswers([{ answer: '', token_pool: 0 }]);
+      setSelectedTags([]);
     } catch (err) {
       setError((err as Error).message || 'Failed to create market or add answers.');
     }
@@ -148,6 +159,22 @@ export default function CreateMarketForm() {
           />
         </div>
       )}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-black">Select Tags:</label>
+        <div className="mt-2 flex flex-wrap gap-4">
+          {MARKET_TAGS.map((tag) => (
+            <label key={tag} className="flex items-center space-x-2 text-black">
+              <input
+                type="checkbox"
+                checked={selectedTags.includes(tag)}
+                onChange={() => handleTagToggle(tag)}
+                className="h-4 w-4"
+              />
+              <span>{tag}</span>
+            </label>
+          ))}
+        </div>
+      </div>
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700">Initial Answers:</label>
         {answers.map((answer, index) => (

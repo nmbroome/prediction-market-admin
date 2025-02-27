@@ -6,10 +6,16 @@ export interface Market {
   description: string;
   token_pool: number;
   market_maker: string;
+  tags: string[];
 }
 
 export async function addMarket(market: Market) {
-  const { data, error } = await supabase.from('markets').insert(market).select('*').single();
+  const { data, error } = await supabase
+    .from('markets')
+    .insert(market)
+    .select('*')
+    .single();
+
   if (error || !data) {
     throw new Error(error?.message || 'Market creation failed');
   }
