@@ -146,6 +146,7 @@ Uses Constant Product Market Maker (CPMM) algorithm to determine prices:
 - [ ] Automate market creation with recurring markets
 - [ ] Add an email after prizes & payments
 - [ ] Crawler to duplicate markets from other sites
+    - [ ] Economic Bureau https://www.census.gov/economic-indicators/#
     - [ ] Kalshi
     - [ ] Polymarket
     - [ ] Manifold
