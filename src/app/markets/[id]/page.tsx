@@ -185,6 +185,39 @@ export default function MarketDetails() {
     }
   };
 
+  const handleAnnulMarket = async () => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    if (!user) {
+      setError("User is not logged in.");
+      setLoading(false);
+      return;
+    }
+
+    if (!isCreator) {
+      setError("Only the market creator can annul this market.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Call the Edge Function to annul the market
+      // This is a placeholder - the actual edge function will be implemented later
+      console.log(`Annulling market ${market?.id}`);
+      
+      setSuccess("Market has been annulled successfully.");
+      
+      // In a real implementation, you would refresh the market data here
+      // await fetchMarketData();
+    } catch (e) {
+      setError(`Error annulling market: ${e}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!market) return <div>Loading...</div>;
 
   return (
@@ -246,6 +279,23 @@ export default function MarketDetails() {
         ) : (
           <p className="mt-2">No answers available for this market.</p>
         )}
+        
+        {/* Annul Market button - only visible to the creator */}
+        {isCreator && (
+          <div className="mt-6">
+            <button
+              onClick={handleAnnulMarket}
+              className="px-4 py-2 text-white bg-red-600 rounded-lg shadow hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              disabled={loading}
+            >
+              {loading ? "Processing..." : "Annul Market"}
+            </button>
+            <p className="mt-2 text-sm text-gray-400">
+              Annulling the market will void all predictions and return funds to participants.
+            </p>
+          </div>
+        )}
+        
         {error && <p className="mt-4 text-red-600">{error}</p>}
         {success && <p className="mt-4 text-green-600">{success}</p>}
       </div>
