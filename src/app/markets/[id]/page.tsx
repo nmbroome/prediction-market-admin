@@ -13,6 +13,7 @@ interface Market {
   description: string;
   token_pool: number;
   market_maker: string;
+  creator_id?: string; // Make this optional since it might not exist in all records
 }
 
 interface Answer {
@@ -28,14 +29,20 @@ export default function MarketDetails() {
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [amountIn, setAmountIn] = useState<number>(10);
   const [user, setUser] = useState<User | null>(null);
+  const [isCreator, setIsCreator] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const fetchUser = async () => {
     try {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error) throw new Error(error.message);
       setUser(user);
+      
+      if (market && user && market.creator_id) {
+        setIsCreator(market.creator_id === user.id);
+      }
     } catch (e) {
       setError(`Error fetching user: ${e}`);
     }
@@ -45,14 +52,21 @@ export default function MarketDetails() {
     if (!id) return;
 
     try {
+      // Try to fetch with creator_id if it exists
       const { data: marketData, error: marketError } = await supabase
         .from("markets")
-        .select("id, name, description, token_pool, market_maker")
+        .select("id, name, description, token_pool, market_maker, creator_id")
         .eq("id", id)
         .single();
 
       if (marketError) throw new Error(marketError.message);
+      
       setMarket(marketData as Market);
+      
+      // Check if the current user is the creator
+      if (user && marketData.creator_id) {
+        setIsCreator(marketData.creator_id === user.id);
+      }
 
       const { data: answersData, error: answersError } = await supabase
         .from("outcomes")
@@ -64,7 +78,7 @@ export default function MarketDetails() {
     } catch (e) {
       setError(`Error fetching market data: ${e}`);
     }
-  }, [id]);
+  }, [id, user]);
 
   useEffect(() => {
     fetchUser();
@@ -132,6 +146,45 @@ export default function MarketDetails() {
     }
   };
 
+  const handleCloseMarket = async (outcomeId: number) => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    if (!user) {
+      setError("User is not logged in.");
+      setLoading(false);
+      return;
+    }
+
+    if (!isCreator) {
+      setError("Only the market creator can close this market.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Call the Edge Function to close the market with the selected outcome
+      const { error } = await supabase.functions.invoke('close-market', {
+        body: { 
+          marketId: market?.id, 
+          outcomeId: outcomeId 
+        }
+      });
+
+      if (error) throw new Error(error.message);
+
+      setSuccess(`Market successfully closed with outcome: ${answers.find(a => a.id === outcomeId)?.name}`);
+      
+      // Refresh market data to show updated state
+      await fetchMarketData();
+    } catch (e) {
+      setError(`Error closing market: ${e}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!market) return <div>Loading...</div>;
 
   return (
@@ -164,18 +217,30 @@ export default function MarketDetails() {
         {answers.length > 0 ? (
           <div className="flex flex-col">
             {answers.map((answer) => (
-              <button
-                key={answer.id}
-                onClick={() => handlePrediction(answer)}
-                className="mt-2 w-fit px-4 py-2 text-white bg-blue-600 rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                <span className="block text-lg font-medium">{answer.name}</span>
-                <span className="block text-sm">
-                  {market?.token_pool
-                    ? ((answer.tokens / market.token_pool) * 100).toFixed(2) + "%"
-                    : "N/A"}
-                </span>
-              </button>
+              <div key={answer.id} className="mt-2 flex gap-4 items-center">
+                <button
+                  onClick={() => handlePrediction(answer)}
+                  className="w-fit px-4 py-2 text-white bg-blue-600 rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  <span className="block text-lg font-medium">{answer.name}</span>
+                  <span className="block text-sm">
+                    {market?.token_pool
+                      ? ((answer.tokens / market.token_pool) * 100).toFixed(2) + "%"
+                      : "N/A"}
+                  </span>
+                </button>
+                
+                {/* Only show close market buttons to the creator */}
+                {isCreator && (
+                  <button
+                    onClick={() => handleCloseMarket(answer.id)}
+                    className="w-fit px-4 py-2 text-white bg-green-600 rounded-lg shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                    disabled={loading}
+                  >
+                    {loading ? "Processing..." : `Close market with ${answer.name}`}
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         ) : (
