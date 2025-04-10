@@ -129,93 +129,94 @@ Uses Constant Product Market Maker (CPMM) algorithm to determine prices:
 
 ## Roadmap
 
- - [ ] Payment Processing System
-    - [ ] Implement MTurk payment integration for user rewards
-    - [ ] Create admin dashboard for managing payments
-    - [ ] Bulk payment selection interface
-    - [ ] Payment tracking with unique Payment IDs
-    - [ ] MTurk Assignment ID linking
-    - [ ] Custom amount fields for flexible compensation
-    - [ ] Add payment history tracking for administrators
-    - [ ] Implement payment status notifications for users
-    - [ ] Create automated payment scheduling for regular payouts
-    - [ ] Add support for alternative payment methods (PayPal, direct deposit)
-    - [ ] Build reporting tools for payment reconciliation
-- [ ] Add resolve market button to market details page
-- [ ] Add annull market button to market details page
+- [x] Add resolve market button to market details page
+- [x] Add annull market button to market details page
+- [ ] Payment Processing System
+  - [ ] Implement MTurk payment integration for user rewards
+  - [ ] Create admin dashboard for managing payments
+  - [ ] Bulk payment selection interface
+  - [ ] Payment tracking with unique Payment IDs
+  - [ ] MTurk Assignment ID linking
+  - [ ] Custom amount fields for flexible compensation
+  - [ ] Add payment history tracking for administrators
+  - [ ] Implement payment status notifications for users
+  - [ ] Create automated payment scheduling for regular payouts
+  - [ ] Add support for alternative payment methods (PayPal, direct deposit)
+  - [ ] Build reporting tools for payment reconciliation
 - [ ] Automate market creation with recurring markets
 - [ ] Add an email after prizes & payments
 - [ ] Crawler to duplicate markets from other sites
-    - [ ] Economic Bureau https://www.census.gov/economic-indicators/#
-    - [ ] Kalshi
-    - [ ] Polymarket
-    - [ ] Manifold
+  - [ ] Economic Bureau https://www.census.gov/economic-indicators/#
+  - [ ] Kalshi
+  - [ ] Polymarket
+  - [ ] Manifold
 - [ ] Add $1 per player who played to the overall prize pool
 - [ ] Forecasting analytics https://forecastapp.substack.com/p/whos-best-at-predicting-the-future
-    - [ ] F-score give more weight to false positives and false negatives, whereas others, like area under curve measure accuracy as an integral of predicted performance in a two-dimensional space.
-    - [ ] accuracy is the number of times you got a forecast right over the number of forecasts you made; your precision is how many times you correctly predicted Yes over the total number of Yeses you predicted; your recall is the number of times you correctly predicted Yes over the number of questions you forecasted that settled Yes. Related concepts, but all of them measure slightly different things.
-    - [ ] Brier Score metrics don’t work for measuring user skill because Forecast doesn’t capture your predicted probability of an outcome - we only know your minimum predicted probability of the outcome. When you Buy the Yes for 25 points, we don’t know if you believe the probability is 30% or 90%, just that it’s greater than 25%.
- - [ ] Advanced User Analytics Dashboard
-    - [ ] Implement Brier score calculation for user forecasting accuracy
-    - [ ] Track lifetime profit metrics for all users
-    - [ ] Create visualization comparing Brier scores vs. profit rankings
-    - [ ] Segment analysis by trading volume (low/medium/high activity users)
-    - [ ] Add correlation statistics to help users understand forecasting skill vs. profitability
-    - [ ] Include this as part of user profile statistics and platform-wide leaderboards
+  - [ ] F-score give more weight to false positives and false negatives, whereas others, like area under curve measure accuracy as an integral of predicted performance in a two-dimensional space.
+  - [ ] accuracy is the number of times you got a forecast right over the number of forecasts you made; your precision is how many times you correctly predicted Yes over the total number of Yeses you predicted; your recall is the number of times you correctly predicted Yes over the number of questions you forecasted that settled Yes. Related concepts, but all of them measure slightly different things.
+  - [ ] Brier Score metrics don’t work for measuring user skill because Forecast doesn’t capture your predicted probability of an outcome - we only know your minimum predicted probability of the outcome. When you Buy the Yes for 25 points, we don’t know if you believe the probability is 30% or 90%, just that it’s greater than 25%.
+- [ ] Advanced User Analytics Dashboard
+  - [ ] Implement Brier score calculation for user forecasting accuracy
+  - [ ] Track lifetime profit metrics for all users
+  - [ ] Create visualization comparing Brier scores vs. profit rankings
+  - [ ] Segment analysis by trading volume (low/medium/high activity users)
+  - [ ] Add correlation statistics to help users understand forecasting skill vs. profitability
+  - [ ] Include this as part of user profile statistics and platform-wide leaderboards
 - [] Research & Analytics Dashboard
-    - []  IQ tracking and distribution analysis
-    - []  Implement IQ test integration for user cognitive assessment
-    - [] Create visual distribution chart with statistical measures
-    - []  Add filtering capabilities by IQ ranges
-    - []  Platform engagement metrics
-    - []  Track daily/weekly/monthly engagement rates
-    - []  Visualize engagement trends over time
-    - []  Correlate engagement spikes with platform events
-    - []  Trading activity monitoring
-    - []  Track order volumes and types
-    - [] Create visualizations for trade frequency and size
-    - []  Research tools for analyzing forecaster characteristics
-    - []  Compare cognitive abilities with prediction accuracy
-    - []  Examine relationships between IQ and trading behaviors
-    - [] Generate downloadable datasets for academic research
-    - []  Admin-facing analytics for platform performance
+  - []  IQ tracking and distribution analysis
+  - []  Implement IQ test integration for user cognitive assessment
+  - [] Create visual distribution chart with statistical measures
+  - []  Add filtering capabilities by IQ ranges
+  - []  Platform engagement metrics
+  - []  Track daily/weekly/monthly engagement rates
+  - []  Visualize engagement trends over time
+  - []  Correlate engagement spikes with platform events
+  - []  Trading activity monitoring
+  - []  Track order volumes and types
+  - [] Create visualizations for trade frequency and size
+  - []  Research tools for analyzing forecaster characteristics
+  - []  Compare cognitive abilities with prediction accuracy
+  - []  Examine relationships between IQ and trading behaviors
+  - [] Generate downloadable datasets for academic research
+  - []  Admin-facing analytics for platform performance
 - [] User Management Dashboard
-    - [] Implement comprehensive player/user listing interface
-    - [] Display core user information (username, email)
-    - [] Show trading activity metrics (last trade date, number of trades)
-    - [] Add filtering and sorting capabilities
-    - [] Filter by activity level (active/inactive users)
-    - [] Sort by trade frequency or recency
-    - [] Search functionality by username or email
-    - [] Expand user management features
-    - [] User account status management (active/suspended/deleted)
-    - [] Permission level control
-    - [] User verification tracking
-    - [] Add user engagement metrics
-    - [] Time since registration
-    - [] Login frequency
-    - [] Session duration statistics
-    - [] Create user export functionality for data analysis
-    - [] Implement bulk user actions (notifications, status changes)
+  - [] Implement comprehensive player/user listing interface
+  - [] Display core user information (username, email)
+  - [] Show trading activity metrics (last trade date, number of trades)
+  - [] Add filtering and sorting capabilities
+  - [] Filter by activity level (active/inactive users)
+  - [] Sort by trade frequency or recency
+  - [] Search functionality by username or email
+  - [] Expand user management features
+  - [] User account status management (active/suspended/deleted)
+  - [] Permission level control
+  - [] User verification tracking
+  - [] Add user engagement metrics
+  - [] Time since registration
+  - [] Login frequency
+  - [] Session duration statistics
+  - [] Create user export functionality for data analysis
+  - [] Implement bulk user actions (notifications, status changes)
 - [] Combinatorial/Conditional Markets
-    - []  Implement conditional market creation interface
-    - []  Allow selection of base markets as conditions
-    - []  Enable outcome pairing across different markets
-    - []  Create intuitive UI for linking conditions to outcomes
-    - []  Develop conditional probability calculation engine
-    - []  Implement proper pricing for conditional outcomes
-    - []  Handle dependencies between related markets
-    - []  Add time-bounded market combinations
-    - []  Support for different start/end dates for combinations
-    - []  Time-dependent resolution rules
-    - []  Create visualization tools for conditional probabilities
-    - []  Display implied probabilities based on market conditions
-    - []  Show relationship graphs between connected markets
-    - []  Implement resolution logic for conditional markets
-    - [] Automated resolution based on condition outcomes
-    - []  Partial resolution for partially fulfilled conditions
+  - []  Implement conditional market creation interface
+  - []  Allow selection of base markets as conditions
+  - []  Enable outcome pairing across different markets
+  - []  Create intuitive UI for linking conditions to outcomes
+  - []  Develop conditional probability calculation engine
+  - []  Implement proper pricing for conditional outcomes
+  - []  Handle dependencies between related markets
+  - []  Add time-bounded market combinations
+  - []  Support for different start/end dates for combinations
+  - []  Time-dependent resolution rules
+  - []  Create visualization tools for conditional probabilities
+  - []  Display implied probabilities based on market conditions
+  - []  Show relationship graphs between connected markets
+  - []  Implement resolution logic for conditional markets
+  - [] Automated resolution based on condition outcomes
+  - []  Partial resolution for partially fulfilled conditions
 
 ## Development Status
 
-### April 2, 2025
-- 
+### April 10, 2025
+- Add market resolution to market info page
+- Add market annullment option to market resolution
