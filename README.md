@@ -217,6 +217,9 @@ Uses Constant Product Market Maker (CPMM) algorithm to determine prices:
 
 ## Development Status
 
+### April 11, 2025
+- Add page to view all players
+
 ### April 10, 2025
 - Add market resolution to market info page
 - Add market annullment option to market resolution
