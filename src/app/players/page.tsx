@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import supabase from "@/lib/supabase/createClient";
 import Navbar from "@/components/navbar";
+import Link from "next/link";
 
 interface Profile {
   id: string;
@@ -151,13 +152,19 @@ export default function PlayersPage() {
                     Joined {sortField === "created_at" && (sortDirection === "asc" ? "↑" : "↓")}
                   </th>
                   <th className="px-4 py-3">ID</th>
+                  <th className="px-4 py-3">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {sortedProfiles.map((profile) => (
                   <tr key={profile.id} className="border-t border-gray-800 hover:bg-gray-800">
                     <td className="px-4 py-3">
-                      {profile.username || "N/A"}
+                      <Link 
+                        href={`/players/${profile.id}`}
+                        className="text-blue-400 hover:underline"
+                      >
+                        {profile.username || "N/A"}
+                      </Link>
                     </td>
                     <td className="px-4 py-3">
                       {typeof profile.balance === 'number' ? profile.balance.toFixed(2) : 'N/A'}
@@ -178,6 +185,14 @@ export default function PlayersPage() {
                     </td>
                     <td className="px-4 py-3 font-mono text-xs">
                       {profile.id}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Link 
+                        href={`/players/${profile.id}`}
+                        className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded-md text-sm"
+                      >
+                        View Details
+                      </Link>
                     </td>
                   </tr>
                 ))}
