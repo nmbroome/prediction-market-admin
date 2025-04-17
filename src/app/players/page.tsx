@@ -89,9 +89,9 @@ export default function PlayersPage() {
   // Filter profiles based on search term
   const filteredProfiles = profiles.filter(
     (profile) =>
-      profile.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      profile.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      profile.payment_type?.toLowerCase().includes(searchTerm.toLowerCase())
+      (profile.username?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (profile.id?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (profile.payment_type?.toLowerCase() || "").includes(searchTerm.toLowerCase())
   );
 
   // Sort the filtered profiles
