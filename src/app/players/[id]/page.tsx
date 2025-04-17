@@ -17,21 +17,9 @@ interface Profile {
   is_admin?: boolean;
 }
 
-interface Prediction {
-  id: number;
-  market_id: number;
-  outcome_id: number;
-  predict_amt: number;
-  return_amt: number;
-  created_at: string;
-  market_name?: string;
-  outcome_name?: string;
-}
-
 export default function PlayerDetailsPage() {
   const { id } = useParams();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,46 +36,18 @@ export default function PlayerDetailsPage() {
           .eq("id", id)
           .single();
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error("Profile error:", profileError.message);
+          throw new Error(profileError.message || "Failed to fetch profile");
+        }
+        
         setProfile(profileData);
+        
+        // We'll implement predictions fetching in a separate component later
 
-        // Fetch player predictions
-        const { data: predictionsData, error: predictionsError } = await supabase
-          .from("predictions")
-          .select("*")
-          .eq("user_id", id);
-
-        if (predictionsError) throw predictionsError;
-
-        // Get all markets to add market names
-        const { data: marketsData, error: marketsError } = await supabase
-          .from("markets")
-          .select("id, name");
-
-        if (marketsError) throw marketsError;
-
-        // Get all outcomes to add outcome names
-        const { data: outcomesData, error: outcomesError } = await supabase
-          .from("outcomes")
-          .select("id, name");
-
-        if (outcomesError) throw outcomesError;
-
-        // Enrich predictions with market and outcome names
-        const enrichedPredictions = predictionsData.map((prediction) => {
-          const market = marketsData.find((m) => m.id === prediction.market_id);
-          const outcome = outcomesData.find((o) => o.id === prediction.outcome_id);
-          
-          return {
-            ...prediction,
-            market_name: market?.name || "Unknown Market",
-            outcome_name: outcome?.name || "Unknown Outcome"
-          };
-        });
-
-        setPredictions(enrichedPredictions);
       } catch (err) {
-        console.error("Error fetching player data:", err);
+        // Properly handle and log the error
+        console.error("Error fetching player data:", err instanceof Error ? err.message : 'Unknown error');
         setError("Failed to load player data. Please try again later.");
       } finally {
         setLoading(false);
@@ -202,44 +162,9 @@ export default function PlayerDetailsPage() {
           <h2 className="text-xl font-semibold mb-4 border-b border-gray-700 pb-4">
             Prediction History
           </h2>
-
-          {predictions.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-gray-800 text-white border border-gray-700 rounded-lg">
-                <thead>
-                  <tr className="bg-gray-700">
-                    <th className="px-4 py-3 text-left">Market</th>
-                    <th className="px-4 py-3 text-left">Outcome</th>
-                    <th className="px-4 py-3 text-right">Prediction</th>
-                    <th className="px-4 py-3 text-right">Potential Return</th>
-                    <th className="px-4 py-3 text-right">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {predictions.map((prediction) => (
-                    <tr key={prediction.id} className="border-t border-gray-700 hover:bg-gray-700">
-                      <td className="px-4 py-3">
-                        <Link 
-                          href={`/markets/${prediction.market_id}`}
-                          className="text-blue-400 hover:underline"
-                        >
-                          {prediction.market_name}
-                        </Link>
-                      </td>
-                      <td className="px-4 py-3">{prediction.outcome_name}</td>
-                      <td className="px-4 py-3 text-right">{prediction.predict_amt.toFixed(2)}</td>
-                      <td className="px-4 py-3 text-right">{prediction.return_amt.toFixed(2)}</td>
-                      <td className="px-4 py-3 text-right">
-                        {new Date(prediction.created_at).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="text-center py-4">This player has not made any predictions yet.</p>
-          )}
+          
+          {/* Placeholder for future prediction component */}
+          <p className="text-center py-4">Prediction history placeholder</p>
         </div>
       </div>
     </div>
