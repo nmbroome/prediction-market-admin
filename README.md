@@ -134,9 +134,9 @@ Uses Constant Product Market Maker (CPMM) algorithm to determine prices:
 - [ ] Add prediction history component to player details page
 - [ ] Add ability to update balance on player details page
 - [ ] Payment Processing System
-  - [ ] Implement MTurk payment integration for user rewards
-  - [ ] Create admin dashboard for managing payments
-  - [ ] Bulk payment selection interface
+  - [x] Implement MTurk payment integration for user rewards
+  - [x] Create admin dashboard for managing payments
+  - [x] Bulk payment selection interface
   - [ ] Payment tracking with unique Payment IDs
   - [ ] MTurk Assignment ID linking
   - [ ] Custom amount fields for flexible compensation
@@ -231,3 +231,7 @@ Uses Constant Product Market Maker (CPMM) algorithm to determine prices:
 ### April 10, 2025
 - Add market resolution to market info page
 - Add market annullment option to market resolution
+
+### May 22, 2025
+- Update payment page for individual/batch payments
+- Add option to pay active users for current cycle
