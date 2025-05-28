@@ -19,6 +19,18 @@ interface Profile {
   payment_id?: string | null;
 }
 
+/*
+interface Prediction {
+  user_id: string;
+  market_id: number;
+  outcome_id: number;
+  shares_amt: number;
+  market_odds: number;
+  trade_value: number;
+  trade_type: string;
+  created_at: string;
+}
+*/
 
 export default function Leaderboard() {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
@@ -44,22 +56,65 @@ export default function Leaderboard() {
         
         console.log(`Found ${validProfiles.length} valid profiles out of ${profiles.length} total`);
 
-        // Fetch all predictions at once for better performance
+        // Target specific market ID
+        const targetMarketId = 35;
+        console.log(`Targeting market ID: ${targetMarketId}`);
+
+        // Get the specific market to verify it exists
+        const { data: targetMarket, error: marketError } = await supabase
+          .from("markets")
+          .select("id, name, status")
+          .eq("id", targetMarketId)
+          .single();
+
+        if (marketError || !targetMarket) {
+          console.warn("Error fetching target market or market not found:", marketError);
+          setLeaderboardData([]);
+          return;
+        }
+
+        console.log(`Found target market: ${targetMarket.name} (Status: ${targetMarket.status})`);
+
+        // Get outcomes for the target market to calculate odds
+        const { data: outcomes, error: outcomesError } = await supabase
+          .from("outcomes")
+          .select("id, name, market_id, tokens")
+          .eq("market_id", targetMarketId);
+
+        if (outcomesError) {
+          console.warn("Error fetching outcomes:", outcomesError);
+        }
+
+        // Fetch predictions for the target market only
         const { data: allPredictions, error: predictionsError } = await supabase
           .from("predictions")
-          .select("user_id, trade_value");
+          .select("user_id, shares_amt, market_odds, trade_value, trade_type, market_id, outcome_id, created_at")
+          .eq("market_id", targetMarketId);
 
         if (predictionsError) {
           console.warn("Error fetching predictions:", predictionsError);
+          console.log("Target market ID:", targetMarketId);
         }
 
-        // Fetch all payouts at once
+        // Fetch payouts for the target market only (if payouts table exists)
         const { data: allPayouts, error: allPayoutsError } = await supabase
           .from("payouts")
-          .select("*");
+          .select("*")
+          .eq("market_id", targetMarketId);
 
         if (allPayoutsError) {
-          console.warn("Error fetching all payouts:", allPayoutsError);
+          console.warn("Error fetching payouts (table may not exist):", allPayoutsError);
+        }
+
+        console.log(`Found ${allPredictions?.length || 0} predictions, ${allPayouts?.length || 0} payouts, and ${outcomes?.length || 0} outcomes for market ${targetMarketId}`);
+
+        // Debug: Log the actual market ID and check data
+        console.log("Target market ID:", targetMarketId);
+        if (allPredictions && allPredictions.length > 0) {
+          console.log("Sample prediction:", allPredictions[0]);
+        }
+        if (allPayouts && allPayouts.length > 0) {
+          console.log("Sample payout:", allPayouts[0]);
         }
 
         // Determine payout amount column name by checking common possibilities
@@ -78,18 +133,40 @@ export default function Leaderboard() {
           }
         }
 
-        // Group predictions by user_id for faster lookup
+        // Calculate current positions and trading PnL from predictions
         const predictionsByUser: Record<string, number> = {};
+        const positionsByUser: Record<string, Record<string, number>> = {}; // user_id -> outcome_id -> shares
+        
         if (allPredictions && allPredictions.length > 0) {
           allPredictions.forEach(prediction => {
             const userId = prediction.user_id;
-            const value = Number(prediction.trade_value || 0);
+            const outcomeId = prediction.outcome_id.toString();
+            const tradeValue = Number(prediction.trade_value || 0);
+            const sharesAmt = Number(prediction.shares_amt || 0);
+            const tradeType = prediction.trade_type;
             
+            // Track trading PnL
             if (!predictionsByUser[userId]) {
               predictionsByUser[userId] = 0;
             }
+            predictionsByUser[userId] += tradeValue;
             
-            predictionsByUser[userId] += value;
+            // Track current positions
+            if (!positionsByUser[userId]) {
+              positionsByUser[userId] = {};
+            }
+            if (!positionsByUser[userId][outcomeId]) {
+              positionsByUser[userId][outcomeId] = 0;
+            }
+            
+            // Update position based on trade type
+            if (tradeType === "buy") {
+              positionsByUser[userId][outcomeId] += sharesAmt;
+            } else if (tradeType === "sell") {
+              positionsByUser[userId][outcomeId] -= sharesAmt;
+            }
+            
+            console.log(`User ${userId}: ${tradeType} ${sharesAmt} shares of outcome ${outcomeId}, trade value: ${tradeValue}`);
           });
         }
 
@@ -115,19 +192,86 @@ export default function Leaderboard() {
           });
         }
 
+        // Create maps for outcome data and market odds calculation
+        const outcomeMap: Record<string, { market_id: string; tokens: number; name: string }> = {};
+        const marketTokenTotals: Record<string, number> = {};
+        
+        if (outcomes && outcomes.length > 0) {
+          outcomes.forEach(outcome => {
+            outcomeMap[outcome.id] = {
+              market_id: outcome.market_id,
+              tokens: Number(outcome.tokens || 0),
+              name: outcome.name
+            };
+            
+            // Calculate total tokens per market
+            if (!marketTokenTotals[outcome.market_id]) {
+              marketTokenTotals[outcome.market_id] = 0;
+            }
+            marketTokenTotals[outcome.market_id] += Number(outcome.tokens || 0);
+          });
+        }
+
+        // Create a map of outcome odds for quick lookup
+        const outcomeOddsMap: Record<string, number> = {};
+        if (outcomes && outcomes.length > 0) {
+          outcomes.forEach(outcome => {
+            const tokens = Number(outcome.tokens || 0);
+            const totalTokens = marketTokenTotals[outcome.market_id] || 0;
+            
+            // Calculate odds as outcome_tokens / total_market_tokens
+            const epsilon = 0.001;
+            const adjustedTotal = Math.max(totalTokens, epsilon);
+            const odds = totalTokens > 0 ? tokens / adjustedTotal : 0.5;
+            
+            outcomeOddsMap[outcome.id] = odds;
+            
+            console.log(`Outcome ${outcome.id} (${outcome.name}): ${tokens}/${totalTokens} = ${odds.toFixed(3)} odds`);
+          });
+        }
+
+        // Calculate current value of held positions by user
+        const positionValuesByUser: Record<string, number> = {};
+        
+        // For each user's positions, calculate current value using live odds
+        Object.entries(positionsByUser).forEach(([userId, userPositions]) => {
+          let totalPositionValue = 0;
+          
+          Object.entries(userPositions).forEach(([outcomeId, shares]) => {
+            if (shares > 0) { // Only count positive positions
+              const currentOdds = outcomeOddsMap[outcomeId];
+              if (currentOdds !== undefined) {
+                const positionValue = shares * currentOdds;
+                totalPositionValue += positionValue;
+                
+                const outcomeName = outcomeMap[outcomeId]?.name || outcomeId;
+                console.log(`User ${userId} holds ${shares} shares of ${outcomeName} worth ${positionValue.toFixed(3)} (odds: ${currentOdds.toFixed(3)})`);
+              }
+            }
+          });
+          
+          if (totalPositionValue > 0) {
+            positionValuesByUser[userId] = totalPositionValue;
+            console.log(`User ${userId} total position value: ${totalPositionValue.toFixed(3)}`);
+          }
+        });
+
         const leaderboardResults: LeaderboardEntry[] = [];
         
         // For each user, calculate their total profit and percent PNL
         for (const profile of validProfiles) {
           try {
-            // Get trading PNL from predictions
+            // Get trading PNL from predictions (target market only)
             const tradingPNL = predictionsByUser[profile.user_id] || 0;
             
-            // Get user's total payouts
+            // Get user's total payouts (target market only)
             const totalPayouts = payoutsByUser[profile.user_id] || 0;
 
-            // Calculate total profit (PNL + payouts)
-            const totalProfit = tradingPNL + totalPayouts;
+            // Get current value of held positions
+            const currentPositionValue = positionValuesByUser[profile.user_id] || 0;
+
+            // Calculate total profit (PNL + payouts + current position value)
+            const totalProfit = tradingPNL + totalPayouts + currentPositionValue;
             
             // Get user's balance (or default to 100 if not available)
             const balance = profile.balance || 100;
@@ -149,7 +293,7 @@ export default function Leaderboard() {
           }
         }
 
-        // Filter users with no activity
+        // Filter users with no activity in the target market
         const activeUsers = leaderboardResults.filter(
           entry => entry.total_profit !== 0 || entry.percent_pnl !== 0
         );
@@ -234,7 +378,7 @@ export default function Leaderboard() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-center text-white">Prophet Market Leaderboard</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center text-white">Prophet Market Leaderboard (Market 35)</h1>
       
       <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden border border-gray-700">
         <div className="overflow-x-auto">
@@ -293,8 +437,8 @@ export default function Leaderboard() {
               
               {leaderboardData.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-6 py-4 text-center text-gray-400">
-                    No leaderboard data available yet
+                  <td colSpan={4} className="px-6 py-4 text-center text-gray-400">
+                    No leaderboard data available for market 35
                   </td>
                 </tr>
               )}
