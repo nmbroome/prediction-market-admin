@@ -146,6 +146,7 @@ Uses Constant Product Market Maker (CPMM) algorithm to determine prices:
   - [ ] Add support for alternative payment methods (PayPal, direct deposit)
   - [ ] Build reporting tools for payment reconciliation
 - [ ] Automate market creation with recurring markets
+- [ ] Analytics like manifold.stats
 - [ ] Add an email after prizes & payments
 - [ ] Crawler to duplicate markets from other sites
   - [ ] Economic Bureau https://www.census.gov/economic-indicators/#
@@ -235,3 +236,6 @@ Uses Constant Product Market Maker (CPMM) algorithm to determine prices:
 ### May 22, 2025
 - Update payment page for individual/batch payments
 - Add option to pay active users for current cycle
+
+### May 28, 2025
+- Update leaderboard component

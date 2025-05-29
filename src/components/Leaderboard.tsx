@@ -378,7 +378,7 @@ export default function Leaderboard() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-center text-white">Prophet Market Leaderboard (Market 35)</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center text-white">Prophet Market Leaderboard</h1>
       
       <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden border border-gray-700">
         <div className="overflow-x-auto">
