@@ -220,6 +220,9 @@ Uses Constant Product Market Maker (CPMM) algorithm to determine prices:
 
 ## Development Status
 
+### June 3, 2025
+- Start economic indicators market page
+
 ### April 17, 2025
 - Fix error on players and player details
 
