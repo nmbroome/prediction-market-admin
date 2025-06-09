@@ -19,19 +19,6 @@ interface Profile {
   payment_id?: string | null;
 }
 
-/*
-interface Prediction {
-  user_id: string;
-  market_id: number;
-  outcome_id: number;
-  shares_amt: number;
-  market_odds: number;
-  trade_value: number;
-  trade_type: string;
-  created_at: string;
-}
-*/
-
 export default function Leaderboard() {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,8 +27,7 @@ export default function Leaderboard() {
   const [sortDirection, setSortDirection] = useState("desc");
 
   useEffect(() => {
-    async function fetchAndCalculateLeaderboardData() {
-      setLoading(true);
+    const fetchAndCalculateLeaderboardData = async () => {
       try {
         // Get all users with their profiles
         const { data: profiles, error: profilesError } = await supabase
@@ -308,7 +294,7 @@ export default function Leaderboard() {
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     fetchAndCalculateLeaderboardData();
   }, [sortBy, sortDirection]);
@@ -386,6 +372,9 @@ export default function Leaderboard() {
             <thead className="bg-gray-900">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Position
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   User
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
@@ -415,6 +404,16 @@ export default function Leaderboard() {
               {leaderboardData.map((player, index) => (
                 <tr key={player.user_id} className={index % 2 === 0 ? "bg-gray-800" : "bg-gray-900"}>
                   <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <span className="text-lg font-bold text-yellow-400 mr-2">
+                        #{index + 1}
+                      </span>
+                      {index === 0 && <span className="text-yellow-400">🏆</span>}
+                      {index === 1 && <span className="text-gray-300">🥈</span>}
+                      {index === 2 && <span className="text-orange-400">🥉</span>}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-white">
                       {player.username || player.user_id}
                     </div>
@@ -437,7 +436,7 @@ export default function Leaderboard() {
               
               {leaderboardData.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-6 py-4 text-center text-gray-400">
+                  <td colSpan={5} className="px-6 py-4 text-center text-gray-400">
                     No leaderboard data available for market 35
                   </td>
                 </tr>
