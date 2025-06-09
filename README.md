@@ -221,6 +221,9 @@ Uses Constant Product Market Maker (CPMM) algorithm to determine prices:
 ## Development Status
 
 ### June 3, 2025
+- Update leaderboard component with numbering
+
+### June 3, 2025
 - Update economic indicators page to display business formation data
 
 ### June 3, 2025
